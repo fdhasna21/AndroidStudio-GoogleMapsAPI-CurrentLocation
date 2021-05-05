@@ -16,14 +16,16 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 
 
 class MapsActivity : AppCompatActivity(){
     private lateinit var mMap : GoogleMap
-    private lateinit var myLocation : LatLng //position based GPS
-    private lateinit var myAddress : String //position based GPS
     private lateinit var fusedLocationProviderClient : FusedLocationProviderClient
+    private lateinit var myLocation : LatLng    //location based GPS
+    private lateinit var myAddress : String     //address based GPS
+    private var myMarker : Marker? = null       //marker based GPS
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,8 +101,14 @@ class MapsActivity : AppCompatActivity(){
                                     val geocoder = Geocoder(this@MapsActivity)
                                     val geoAddress = geocoder.getFromLocation(it.result.latitude, it.result.longitude, 1)
                                     myAddress = geoAddress[0].getAddressLine(0)
-                                    mMap.addMarker(MarkerOptions().position(myLocation).title(myAddress)).showInfoWindow()
-                                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15f))
+
+                                    val newMarker = mMap.addMarker(MarkerOptions().position(myLocation).title(myAddress))
+                                    newMarker.showInfoWindow()
+                                    if(newMarker != myMarker){
+                                        myMarker?.remove()
+                                    }
+                                    myMarker = newMarker
+                                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15f))
                                 }
                             }
                         }
